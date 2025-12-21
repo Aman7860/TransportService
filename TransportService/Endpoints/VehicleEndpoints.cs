@@ -32,8 +32,8 @@ namespace TransportService.Endpoints
             })
         .Produces<VehicleResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
-        .WithSummary("Get vehicle details by Id")
-        .WithDescription("Returns vehicle details for the given Id");
+        .WithSummary("Get vehicle details by Id.")
+        .WithDescription("Returns vehicle details for the given Id.");
 
             group.MapPost("/", async (
         VehicleCreateRequest request,
@@ -46,7 +46,7 @@ namespace TransportService.Endpoints
         .Produces<VehicleResponse>(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .WithSummary("Create a vehicle")
-        .WithDescription("Creates a new vehicle");
+        .WithDescription("Creates a new vehicle.");
 
             // PUT: /api/vehicles/{id}  (FULL update)
             group.MapPut("/UpdateVehicle/{id:int}", async (
