@@ -10,18 +10,34 @@ namespace TransportService.Data
             : base(options)
         {
         }
+
+        public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+
+        public override async Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.SetCreated();
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.SetUpdated();
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Vehicle>(entity =>
-            {
-                entity.Property(e => e.CreatedDate)
-                      .HasDefaultValueSql("GETDATE()")
-                      .IsRequired();
-
-                entity.Property(e => e.UpdatedDate)
-                      .IsRequired(false);
-            });
+            modelBuilder.Entity<Vehicle>()
+                .HasIndex(v => new { v.Name, v.Brand, v.Year })
+                .IsUnique();
         }
-        public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+
+
     }
 }
