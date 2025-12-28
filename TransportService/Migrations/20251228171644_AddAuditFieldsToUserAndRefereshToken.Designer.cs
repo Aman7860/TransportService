@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TransportService.Data;
 
@@ -11,9 +12,11 @@ using TransportService.Data;
 namespace TransportService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251228171644_AddAuditFieldsToUserAndRefereshToken")]
+    partial class AddAuditFieldsToUserAndRefereshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,42 +58,6 @@ namespace TransportService.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
-                });
-
-            modelBuilder.Entity("TransportService.Data.Entities.SecurityAuditLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Success")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SecurityAuditLogs");
                 });
 
             modelBuilder.Entity("TransportService.Data.Entities.User", b =>

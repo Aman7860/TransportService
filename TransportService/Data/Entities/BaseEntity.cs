@@ -1,4 +1,4 @@
-﻿namespace TransportService.Models
+﻿namespace TransportService.Data.Entities
 {
     public abstract class BaseEntity
     {

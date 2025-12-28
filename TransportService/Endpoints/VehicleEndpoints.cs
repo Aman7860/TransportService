@@ -1,6 +1,7 @@
 ﻿using TransportService.DTOs.Requests;
 using TransportService.DTOs.Responses;
 using TransportService.Handlers;
+using TransportService.Helpers;
 using TransportService.Repositories.Queries;
 
 namespace TransportService.Endpoints
@@ -9,92 +10,70 @@ namespace TransportService.Endpoints
     {
         public static IEndpointRouteBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
         {
-
             var group = app.MapGroup("/api/vehicles")
-                          .WithTags("Vehicles");
+                           .WithTags("Vehicles")
+                           .RequireAuthorization();
 
-            group.MapGet("/GetVehicles/", async (
-        VehicleHandler handler,
-        CancellationToken cancellationToken) =>
+            group.MapGet("/", async (HttpContext ctx, VehicleHandler handler, CancellationToken ct) =>
             {
-                return Results.Ok(await handler.GetAllAsync(cancellationToken));
+                var data = await handler.GetAllAsync(ct);
+                return ApiResults.Ok(ctx, data, "Vehicles fetched successfully");
             })
-        .Produces<List<VehicleResponse>>(StatusCodes.Status200OK)
-        .WithSummary("Get all vehicles")
-        .WithDescription("Returns a list of all vehicles");
+            .Produces<ApiResponse<List<VehicleResponse>>>(200)
+            .WithSummary("Get all vehicles")
+            .WithDescription("Returns all vehicles");
 
-            group.MapGet("/GetVehicleDetails/{id:int}", async (
-        int id,
-        VehicleHandler handler,
-        CancellationToken cancellationToken) =>
+            group.MapGet("/{id:int}", async (HttpContext ctx, int id, VehicleHandler handler, CancellationToken ct) =>
             {
-                return Results.Ok(await handler.GetByIdAsync(id, cancellationToken));
+                var data = await handler.GetByIdAsync(id, ct);
+                return ApiResults.Ok(ctx, data, "Vehicle fetched successfully");
             })
-        .Produces<VehicleResponse>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound)
-        .WithSummary("Get vehicle details by Id.")
-        .WithDescription("Returns vehicle details for the given Id.");
+            .Produces<ApiResponse<VehicleResponse>>(200)
+            .Produces(404)
+            .WithSummary("Get vehicle by id");
 
-            group.MapPost("/", async (
-        VehicleCreateRequest request,
-        VehicleHandler handler,
-        CancellationToken cancellationToken) =>
+            group.MapPost("/", async (HttpContext ctx, VehicleCreateRequest request, VehicleHandler handler, CancellationToken ct) =>
             {
-                var result = await handler.CreateAsync(request, cancellationToken);
-                return Results.Created("/api/vehicles", result);
+                var result = await handler.CreateAsync(request, ct);
+                return ApiResults.Created(ctx, $"/api/vehicles/{result.Id}", result, "Vehicle created successfully");
             })
-        .Produces<VehicleResponse>(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status400BadRequest)
-        .WithSummary("Create a vehicle")
-        .WithDescription("Creates a new vehicle.");
+            .Produces<ApiResponse<VehicleResponse>>(201)
+            .Produces(400)
+            .WithSummary("Create a vehicle")
+            .RequireAuthorization("AdminOnly");
 
-            // PUT: /api/vehicles/{id}  (FULL update)
-            group.MapPut("/UpdateVehicle/{id:int}", async (
-                int id,
-                VehicleCreateRequest request,
-                VehicleHandler handler,
-                CancellationToken cancellationToken) =>
+            group.MapPut("/{id:int}", async (HttpContext ctx, int id, VehicleCreateRequest request, VehicleHandler handler, CancellationToken ct) =>
             {
-                var result = await handler.UpdateAsync(
-                    id, request, cancellationToken);
-
-                return Results.Ok(result);
+                var result = await handler.UpdateAsync(id, request, ct);
+                return ApiResults.Ok(ctx, result, "Vehicle updated successfully");
             })
-            .Produces<VehicleResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithSummary("Update a vehicle (full update)");
+            .Produces<ApiResponse<VehicleResponse>>(200)
+            .Produces(404)
+            .WithSummary("Update a vehicle")
+            .RequireAuthorization("AdminOnly");
 
-            // PATCH: /api/vehicles/{id}  (PARTIAL update)
-            group.MapPatch("/UpdateVehicleDetails/{id:int}", async (
-                int id,
-                VehiclePatchRequest request,
-                VehicleHandler handler,
-                CancellationToken cancellationToken) =>
+            group.MapPatch("/{id:int}", async (HttpContext ctx, int id, VehiclePatchRequest request, VehicleHandler handler, CancellationToken ct) =>
             {
-                var result = await handler.PatchAsync(
-                    id, request, cancellationToken);
-
-                return Results.Ok(result);
+                var result = await handler.PatchAsync(id, request, ct);
+                return ApiResults.Ok(ctx, result, "Vehicle partially updated");
             })
-            .Produces<VehicleResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithSummary("Update a vehicle (partial update)");
+            .Produces<ApiResponse<VehicleResponse>>(200)
+            .Produces(404)
+            .WithSummary("Partially update a vehicle")
+            .RequireAuthorization("AdminOnly");
 
-            // DELETE: /api/vehicles/{id}
-            group.MapDelete("/DeleteVehicle/{id:int}", async (
-                int id,
-                VehicleHandler handler,
-                CancellationToken cancellationToken) =>
+            group.MapDelete("/{id:int}", async (HttpContext ctx, int id, VehicleHandler handler, CancellationToken ct) =>
             {
-                await handler.DeleteAsync(id, cancellationToken);
-                return Results.NoContent();
+                await handler.DeleteAsync(id, ct);
+                return ApiResults.NoContent(ctx, "Vehicle deleted successfully");
             })
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithSummary("Delete a vehicle");
+            .Produces<ApiResponse<object>>(200)
+            .Produces(404)
+            .WithSummary("Delete a vehicle")
+            .RequireAuthorization("AdminOnly");
 
             return app;
         }
     }
+
 }

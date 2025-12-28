@@ -1,4 +1,6 @@
-﻿namespace TransportService.Middlewares
+﻿using TransportService.Middlewares;
+
+namespace TransportService.Extensions
 {
     public static class ApplicationPipelineExtensions
     {
@@ -16,6 +18,9 @@
             }
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
+            app.UseAuthentication();
+            app.UseMiddleware<JwtValidationMiddleware>();  // our custom validator
+            app.UseAuthorization();
 
             return app;
         }
