@@ -1,4 +1,4 @@
-﻿using TransportService.Models;
+﻿using TransportService.Data.Entities;
 using TransportService.Repositories.Queries;
 
 namespace TransportService.Repositories.Interfaces
@@ -9,7 +9,7 @@ namespace TransportService.Repositories.Interfaces
         Task<List<Vehicle>> GetAllAsync(CancellationToken cancellationToken);
         Task<Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken);
         Task<Vehicle> AddAsync(Vehicle vehicle, CancellationToken cancellationToken);
-       
+
         Task UpdateAsync(Vehicle vehicle, CancellationToken cancellationToken);
         Task DeleteAsync(int id, CancellationToken cancellationToken);
         // CREATE duplicate check

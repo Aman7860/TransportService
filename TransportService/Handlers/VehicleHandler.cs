@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
+using TransportService.Data.Entities;
 using TransportService.DTOs.Requests;
 using TransportService.DTOs.Responses;
 using TransportService.Exceptions;
-using TransportService.Models;
 using TransportService.Repositories.Interfaces;
 using TransportService.Repositories.Queries;
 

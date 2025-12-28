@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using TransportService.Data.Entities;
 using TransportService.DTOs.Requests;
 using TransportService.DTOs.Responses;
-using TransportService.Models;
 
 namespace TransportService.Mappers
 {

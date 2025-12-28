@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TransportService.Data;
-using TransportService.Models;
+using TransportService.Data.Entities;
 using TransportService.Repositories.Interfaces;
 using TransportService.Repositories.Queries;
 
@@ -61,7 +61,7 @@ namespace TransportService.Repositories
                 cancellationToken);
         }
 
-        // ✅ UPDATE
+        // UPDATE
         public async Task UpdateAsync(
             Vehicle toUpdate,
             CancellationToken cancellationToken)
