@@ -1,9 +1,13 @@
-﻿using Serilog;
+﻿using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Serilog.Events;
+using TransportService.Data;
 using TransportService.Endpoints;
 using TransportService.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -21,7 +25,16 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddApplicationServices(builder.Configuration);
+
 var app = builder.Build();
+
+Log.Information("Application started in {Environment} environment", app.Environment.EnvironmentName);
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 //// Seed initial admin user
 //using (var scope = app.Services.CreateScope())
@@ -44,11 +57,14 @@ var app = builder.Build();
 //    }
 //}
 
+if (!app.Environment.IsDevelopment())
+{
+    app.Urls.Add("http://0.0.0.0:8080");
+}
+
 app.UseApplicationPipeline();
 
 app.MapVehicleEndpoints();
 app.MapAuthEndpoints();
-////Testing Middleware 
-//app.MapGet("/", () => "TransportService API is running");
 
 app.Run();

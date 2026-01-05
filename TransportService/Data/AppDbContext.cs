@@ -38,6 +38,10 @@ namespace TransportService.Data
                 .HasIndex(v => new { v.Name, v.Brand, v.Year })
                 .IsUnique();
 
+            modelBuilder.Entity<Vehicle>()
+        .Property(v => v.Price)
+        .HasPrecision(18, 2);
+
             //User entity config
             modelBuilder.Entity<User>(entity =>
             {
