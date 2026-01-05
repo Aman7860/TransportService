@@ -21,8 +21,22 @@ namespace TransportService.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            //var env = services.BuildServiceProvider()
+            //      .GetRequiredService<IWebHostEnvironment>();
+
+            var env = services.First(x => x.ServiceType == typeof(IWebHostEnvironment)).ImplementationInstance as IWebHostEnvironment;
+
+            if (env.IsDevelopment())
+            {
+                services.AddDbContext<AppDbContext>(opt =>
+                    opt.UseSqlServer(configuration.GetConnectionString("DevConnection")));
+            }
+            else
+            {
+                services.AddDbContext<AppDbContext>(opt =>
+                    opt.UseNpgsql(configuration.GetConnectionString("ProdConnection")));
+            }
+
 
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<VehicleHandler>();
@@ -40,24 +54,32 @@ namespace TransportService.Extensions
             services.AddScoped<ISecurityAuditRepository, SecurityAuditRepository>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
+      .AddJwtBearer(options =>
+      {
+          var jwtKey = configuration["Jwt:Key"];
 
-                        ValidIssuer = configuration["Jwt:Issuer"],
-                        ValidAudience = configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-         Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
+          if (string.IsNullOrWhiteSpace(jwtKey))
+          {
+              throw new InvalidOperationException("JWT signing key is missing.");
+          }
 
-                        NameClaimType = ClaimTypes.NameIdentifier,
-                        RoleClaimType = ClaimTypes.Role
-                    };
-                });
+          options.TokenValidationParameters = new TokenValidationParameters
+          {
+              ValidateIssuer = true,
+              ValidateAudience = true,
+              ValidateLifetime = true,
+              ValidateIssuerSigningKey = true,
+
+              ValidIssuer = configuration["Jwt:Issuer"],
+              ValidAudience = configuration["Jwt:Audience"],
+              IssuerSigningKey = new SymmetricSecurityKey(
+                  Encoding.UTF8.GetBytes(jwtKey!)),
+
+              NameClaimType = ClaimTypes.NameIdentifier,
+              RoleClaimType = ClaimTypes.Role
+          };
+      });
+
 
             services.AddAuthorization(options =>
             {
